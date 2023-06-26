@@ -1,0 +1,69 @@
+Sub Stock_Market()
+    Dim ticker As String
+    Dim ticker_tracker As Double
+        ticker_tracker = 2
+    Dim stock_volume As Double
+        stock_volume = 0
+    Dim closing_price As Double
+    Dim yearly_change As Double
+    Dim percent_change As Double
+    
+    For Each ws In Worksheets
+        Dim lastrow As Double
+            lastrow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+        Dim opening_price As Double
+            opening_price = ws.Cells(2, 3).Value
+            
+        For i = 2 To lastrow
+            If ws.Cells(i + 1, 1).Value <> ws.Cells(i, 1).Value Then
+            'Grab Ticker Acronym
+                ticker = ws.Cells(i, 1).Value
+                ws.Cells(ticker_tracker, 9).Value = ticker
+                ticker_tracker = ticker_tracker + 1
+            'Calculate Annual Change
+                closing_price = ws.Cells(i, 6).Value
+                yearly_change = closing_price - opening_price
+                ws.Cells(ticker_tracker - 1, 10).Value = yearly_change
+            'Calculate Percent Change
+                percent_change = yearly_change / opening_price
+                ws.Cells(ticker_tracker - 1, 11).Value = percent_change
+            'Grab Opening Price
+                opening_price = ws.Cells(i + 1, 3).Value
+            'Calculate Stock Volume
+                stock_volume = stock_volume + ws.Cells(i, 7).Value
+                ws.Cells(ticker_tracker - 1, 12).Value = stock_volume
+                stock_volume = 0
+            Else
+            'Calculate Stock Volume
+                stock_volume = stock_volume + ws.Cells(i, 7).Value
+            End If
+        Next i
+        
+        For j = 2 To lastrow
+            'Calculate Greatest % Increase
+            If ws.Cells(j, 11).Value > ws.Cells(2, 16).Value Then
+                ws.Cells(2, 16).Value = ws.Cells(j, 11).Value
+                ws.Cells(2, 15).Value = ws.Cells(j, 9).Value
+            End If
+            'Calculate Greatest % Decrease
+            If ws.Cells(j, 11).Value < ws.Cells(3, 16).Value Then
+                ws.Cells(3, 16).Value = ws.Cells(j, 11).Value
+                ws.Cells(3, 15).Value = ws.Cells(j, 9).Value
+            End If
+            'Calculate Greatest Total Volume
+            If ws.Cells(j, 12).Value > ws.Cells(4, 16).Value Then
+                ws.Cells(4, 16).Value = ws.Cells(j, 12).Value
+                ws.Cells(4, 15).Value = ws.Cells(j, 9).Value
+            End If
+            'Conditional Formatting Annual Change
+            If ws.Cells(j, 10).Value > 0 Then
+                ws.Cells(j, 10).Interior.ColorIndex = 4
+            End If
+            If ws.Cells(j, 10).Value < 0 Then
+                ws.Cells(j, 10).Interior.ColorIndex = 3
+            End If
+        Next j
+        ticker_tracker = 2
+    Next ws
+End Sub
+
